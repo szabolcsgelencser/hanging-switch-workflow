@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -40,12 +39,10 @@ func NewClient(httpClient *http.Client, endpoint string, logger log.Logger) Clie
 func (t client) Send(buffer *bytes.Buffer) {
 	res, err := t.httpClient.Post(t.endpoint, "application/json", buffer)
 	if err != nil {
-		fmt.Printf("Couldn't send analytics event: %s\n", err.Error())
 		t.logger.Debugf("Couldn't send analytics event: %s", err.Error())
 		return
 	}
 	if statusOK := res.StatusCode >= 200 && res.StatusCode < 300; !statusOK {
-		fmt.Printf("Couldn't send analytics event, status code: %d\n", res.StatusCode)
 		t.logger.Debugf("Couldn't send analytics event, status code: %d", res.StatusCode)
 	}
 }
