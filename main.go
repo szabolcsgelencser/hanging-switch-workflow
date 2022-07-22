@@ -15,10 +15,12 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().Unix())
+
 	go func() {
 		if err := http.ListenAndServe("localhost:50001", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			latency := rand.Float64()
-			time.Sleep(time.Duration(latency) * time.Second)
+			time.Sleep(time.Duration(latency * float64(time.Second)))
 
 			if rand.Intn(2) == 0 {
 				w.WriteHeader(http.StatusOK)
