@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"time"
 )
 
 func main() {
@@ -24,7 +25,8 @@ func main() {
 		n++
 
 		go func() {
-			ctx := context.Background()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
 			host := fmt.Sprintf("dns-lookup-%d", n)
 			_, err := net.DefaultResolver.LookupIPAddr(ctx, host)
 			if err != nil {
