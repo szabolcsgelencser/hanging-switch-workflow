@@ -1,46 +1,31 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"math/rand"
-	"net/http"
+	"net"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"time"
-
-	"github.com/bitrise-io/go-utils/v2/log"
 )
 
 func main() {
-	rand.Seed(time.Now().Unix())
-
 	go func() {
-		if err := http.ListenAndServe("localhost:50001", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			latency := rand.Float64()
-			time.Sleep(time.Duration(latency * float64(time.Second)))
-
-			if rand.Intn(2) == 0 {
-				w.WriteHeader(http.StatusOK)
+		var n int
+		for {
+			ctx := context.Background()
+			host := fmt.Sprintf("dns-lookup-%d", n)
+			_, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+			if err != nil {
+				// fmt.Printf("error: lookup host: %s\n", err)
 			} else {
-				w.WriteHeader(http.StatusInternalServerError)
+				// fmt.Printf("dns addresses: %+v\n", addrs)
 			}
-		})); err != nil {
-			fmt.Printf("error: listen and serve: %s\n", err)
+			time.Sleep(100 * time.Millisecond)
+			n++
 		}
 	}()
-
-	client := NewDefaultClient(log.NewLogger())
-	for n := 0; n < 10; n++ {
-		go func() {
-			for {
-				client.Send(bytes.NewBufferString(`{"k":"v"}`))
-				time.Sleep(time.Millisecond)
-			}
-		}()
-	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
