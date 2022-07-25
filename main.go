@@ -2,45 +2,47 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net"
-	"os"
-	"os/signal"
-	"path/filepath"
+	"net/http"
+	"os/exec"
+	"sync"
 	"time"
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-	var n int
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("terminating")
-			return
-		default:
-		}
-
-		n++
-
+	var wg sync.WaitGroup
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			host := fmt.Sprintf("dns-lookup-%d", n)
-			_, err := net.DefaultResolver.LookupIPAddr(ctx, host)
-			if err != nil {
-				// fmt.Printf("error: lookup host: %s\n", err)
-			} else {
-				// fmt.Printf("dns addresses: %+v\n", addrs)
-			}
+			cmd := exec.CommandContext(ctx, "./whatever.exe")
+			cmd.Run()
 		}()
-
-		cwd, _ := os.Getwd()
-		if err := EnvmanInitAtPath(filepath.Join(cwd, "envstore")); err != nil {
-			fmt.Printf("error: envman init: %s\n", err)
-		} else if n%1000 == 0 {
-			fmt.Printf("envman init succeeded: %d\n", n)
-		}
 	}
+
+	var wg2 sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg2.Add(1)
+		go func() {
+			defer wg2.Done()
+
+			var netTransport = &http.Transport{
+				Dial: (&net.Dialer{
+					Timeout: 5 * time.Second,
+				}).Dial,
+				TLSHandshakeTimeout: 5 * time.Second,
+			}
+			var netClient = &http.Client{
+				Timeout:   time.Second * 10,
+				Transport: netTransport,
+			}
+			resp, _ := netClient.Get("http://google.com")
+			resp.Body.Close()
+		}()
+	}
+
+	wg.Wait()
+	wg2.Wait()
 }
