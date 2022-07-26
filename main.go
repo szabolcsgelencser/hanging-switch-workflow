@@ -38,8 +38,7 @@ func main() {
 				Timeout:   time.Second * 10,
 				Transport: netTransport,
 			}
-			resp, _ := netClient.Get("http://google.com")
-			resp.Body.Close()
+			netClient.Get("http://google.com")
 		}()
 	}
 
