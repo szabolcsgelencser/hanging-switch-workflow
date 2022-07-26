@@ -25,15 +25,21 @@ void * fork_and_exec(void * vargp) {
 }
 
 int socket_connect(char * host, in_port_t port) {
-  struct hostent * hp;
-  struct sockaddr_in addr;
-  int on = 1, sock;
+  struct addrinfo hints;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF_INET;
+  struct addrinfo * res;
 
-  if ((hp = gethostbyname(host)) == NULL) {
-    herror("gethostbyname");
+  if (getaddrinfo(host, NULL, &hints, &res) != 0) {
+    herror("getaddrinfo");
     exit(1);
   }
-  bcopy(hp -> h_addr, & addr.sin_addr, hp -> h_length);
+  
+  struct sockaddr_in addr;
+  int on = 1, sock;
+  struct sockaddr * foo = res->ai_addr;
+  addr.sin_addr = ((struct sockaddr_in *)foo)->sin_addr;
   addr.sin_port = htons(port);
   addr.sin_family = AF_INET;
   sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
