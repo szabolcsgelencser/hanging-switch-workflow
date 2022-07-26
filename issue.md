@@ -62,11 +62,11 @@ We couldn't reproduce it on Linux (`Ubuntu 20.04`) and macOS Catalina (`10.15.7`
 
 ### What did you do?
 
-Run https://go.dev/play/p/3gaoK8kU6Qb on macOS Big Sur/Monterey via `for i in {1..100}; do go run main.go; echo $i; done`, it usually hangs after ~4-5 runs.
+Run https://go.dev/play/p/3gaoK8kU6Qb on macOS Monterey via `for i in {1..100}; do go run main.go; echo $i; done`, it usually hangs after ~10 runs.
 
 ### What did you expect to see?
 
-Command execution and HTTP request-related goroutines terminate, the main goroutine terminates, and the process exits.
+The command execution and HTTP request-related goroutines terminate, the main goroutine terminates, and the process exits.
 
 ### What did you see instead?
 
