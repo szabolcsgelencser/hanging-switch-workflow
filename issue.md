@@ -5,7 +5,7 @@ $ go version
 go version go1.18.4 darwin/amd64
 </pre>
 
-Also present on older versions *(tested `go1.16` and `go1.17.11` as well)*.
+Also present on older versions *(tested on `go1.16` and `go1.17.11` as well)*.
 
 ### Does this issue reproduce with the latest release?
 
